@@ -1,0 +1,35 @@
+---
+
+- name: Install slurm worker package
+  ansible.builtin.dnf:
+    name: slurm23-slurmd
+    state: latest
+
+- name: Create mount dir
+  ansible.builtin.file:
+    path: /mnt/slurm-home
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+
+- name: Mount NFS
+  ansible.posix.mount:
+    path: /mnt/slurm-home
+    src: "{{ slurm_controller_ip }}:/srv/nfs4"
+    fstype: nfs
+    state: mounted
+
+- name: Open slurmd port
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "6818"
+    jump: ACCEPT
+    action: insert
+
+- name: Start and enable slurmd
+  ansible.builtin.systemd_service:
+    name: slurmd
+    state: started
+    enabled: true

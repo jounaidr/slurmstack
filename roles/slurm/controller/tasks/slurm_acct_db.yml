@@ -1,0 +1,48 @@
+---
+
+- name: Add innodb.conf
+  ansible.builtin.copy:
+    src: innodb.conf
+    dest: /etc/my.cnf.d/innodb.cnf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start and enable mariadb
+  ansible.builtin.systemd_service:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: Install pexpect for mysql_secure_installation script automation
+  ansible.builtin.pip:
+    name: pexpect
+
+- name: Run mysql_secure_installation script
+  ansible.builtin.expect:
+    command: mysql_secure_installation
+    responses:
+      'Enter current password for root': ''
+      'Switch to unix_socket authentication': 'n'
+      'Change the root password': 'n'
+      'Set root password': 'n'
+      'Remove anonymous users': 'y'
+      'Disallow root login remotely': 'y'
+      'Remove test database': 'y'
+      'Reload privilege tables now': 'y'
+    timeout: 30
+
+- name: Create slurm_acct_db database
+  ansible.mariadb.mariadb_db:
+    login_unix_socket: /var/lib/mysql/mysql.sock
+    name: 'slurm_acct_db'
+    state: present
+
+- name: Create the slurm db user and grant privileges on slurm_acct_db
+  ansible.mariadb.mariadb_user:
+    login_unix_socket: /var/lib/mysql/mysql.sock
+    name: 'slurm'
+    password: "{{ slurm_mariadb_pass }}"
+    host: 'localhost'
+    priv: 'slurm_acct_db.*:ALL,GRANT'
+    state: present

@@ -1,0 +1,106 @@
+---
+
+- name: Install slurm controller packages
+  ansible.builtin.dnf:
+    name:
+      - slurm23-slurmctld
+      - slurm23-slurmdbd
+      - slurm23-slurmrestd
+      - mariadb
+      - mariadb-server
+      - python3-devel
+      - python3-PyMySQL
+      - libjwt
+      - libjwt-devel
+    state: latest
+
+- name: Setup nfs-server
+  ansible.builtin.include_tasks:
+    file: nfs_server.yml
+
+- name: Setup slurm accounting database
+  ansible.builtin.include_tasks:
+    file: slurm_acct_db.yml
+
+- name: Update slurmdbd.conf
+  ansible.builtin.template:
+    src: slurmdbd.conf
+    dest: /etc/slurm/slurmdbd.conf
+    owner: slurm
+    group: slurm
+    mode: "0600"
+
+- name: Create jwt key dir
+  ansible.builtin.file:
+    path: /var/spool/slurm/statesave
+    owner: slurm
+    group: slurm
+    mode: "0755"
+    state: directory
+
+- name: Add jwt key
+  ansible.builtin.copy:
+    src: jwt_hs256.key
+    dest: /var/spool/slurm/statesave/jwt_hs256.key
+    owner: slurm
+    group: slurm
+    mode: "0600"
+
+- name: Add the slurmrestd group
+  ansible.builtin.group:
+    name: slurmrestd
+    gid: 2003
+    state: present
+
+- name: Add the slurmrestd user
+  ansible.builtin.user:
+    name: slurmrestd
+    uid: 2003
+    group: slurmrestd
+    comment: "SLURM REST API User"
+    home: /var/lib/slurm
+    shell: /sbin/nologin
+    create_home: false
+    state: present
+
+- name: Create slurmrestd socket dir
+  ansible.builtin.file:
+    path: /run/slurmrestd
+    owner: slurmrestd
+    group: slurmrestd
+    mode: "0755"
+    state: directory
+
+- name: Open slurm ports
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ slurm_ports }}"
+    jump: ACCEPT
+    action: insert
+  loop:
+    - "6817"
+    - "6820"
+  loop_control:
+    loop_var: slurm_ports
+
+- name: Add slurmrestd.service
+  ansible.builtin.copy:
+    src: slurmrestd.service
+    dest: /etc/systemd/system/slurmrestd.service
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start and enable slurm controller services
+  ansible.builtin.systemd_service:
+    name: "{{ slurm_services }}"
+    state: started
+    enabled: true
+    daemon_reload: true
+  loop:
+    - slurmdbd
+    - slurmctld
+    - slurmrestd
+  loop_control:
+    loop_var: slurm_services

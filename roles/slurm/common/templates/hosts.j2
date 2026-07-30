@@ -1,0 +1,9 @@
+# Ansible managed slurm node map, do not mofify
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+{{ slurm_controller_ip }}    {{ slurm_controller_hostname }}
+{% for node in slurm_worker_nodes %}
+{{ node.ip }}    {{ node.hostname }}    node{{ loop.index }}
+{% endfor %}

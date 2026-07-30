@@ -1,0 +1,1 @@
+/srv/nfs4 {{ cluster_ip_range }}(rw,fsid=0,sync,no_root_squash,no_subtree_check,crossmnt)

@@ -1,0 +1,113 @@
+---
+
+- name: Upgrade all packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+
+- name: Install Rocky Linux HPC SIG release package
+  ansible.builtin.dnf:
+    name: rocky-release-hpc
+    state: latest
+
+- name: Install EPEL release package
+  ansible.builtin.dnf:
+    name: epel-release
+    state: latest
+
+- name: Install common slurm packages
+  ansible.builtin.dnf:
+    name:
+      - slurm23
+      - munge
+      - munge-libs
+      - chrony
+      - nfs-utils
+      - environment-modules
+      - openmpi
+      - openmpi-devel
+    state: latest
+
+- name: Add OpenMPI paths
+  ansible.builtin.copy:
+    src: openmpi_env.sh
+    dest: /etc/profile.d/
+    mode: "0644"
+
+# /etc/hosts must be managed by slurm rather than OpenStack
+- name: Disable cloud-init management of /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/cloud/cloud.cfg
+    line: '^update_etc_hosts'
+    state: absent
+
+- name: Add /etc/hosts
+  ansible.builtin.template:
+    src: "hosts.j2"
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Add the slurm group
+  ansible.builtin.group:
+    name: slurm
+    gid: 2002
+    state: present
+
+- name: Add the slurm user
+  ansible.builtin.user:
+    name: slurm
+    uid: 2002
+    group: slurm
+    comment: "SLURM Workload Manager User"
+    home: /var/lib/slurm
+    shell: /sbin/nologin
+    create_home: true
+    state: present
+
+- name: Create slurm directories
+  ansible.builtin.file:
+    path: "{{ slurm_dirs }}"
+    owner: slurm
+    group: slurm
+    mode: "0755"
+    recurse: true
+  loop:
+    - /etc/slurm
+    - /var/log/slurm
+    - /var/lib/slurm
+    - /run/slurm
+    - /var/spool/slurm
+  loop_control:
+    loop_var: slurm_dirs
+
+- name: Update slurm.conf
+  ansible.builtin.template:
+    src: "slurm.conf.j2"
+    dest: /etc/slurm/slurm.conf
+    owner: slurm
+    group: slurm
+    mode: "0644"
+
+# Its important for munge auth and scheduling
+# that all nodes are time synchronized
+- name: Start and enable chrodyd time sync
+  ansible.builtin.systemd_service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Add Munge key
+  ansible.builtin.copy:
+    src: munge.key
+    dest: /etc/munge/munge.key
+    owner: munge
+    group: munge
+    mode: "0700"
+
+- name: Enable and start Munge
+  ansible.builtin.service:
+    name: munge
+    enabled: true
+    state: started

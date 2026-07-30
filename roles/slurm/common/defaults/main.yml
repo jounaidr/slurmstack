@@ -1,0 +1,11 @@
+# Slurm nodes map
+slurm_cluster_name: "slurmstack-cluster"
+slurm_controller_hostname: UNDEFINED
+slurm_controller_ip: UNDEFINED
+slurm_worker_nodes:
+  - hostname: UNDEFINED
+    ip: UNDEFINED
+    cpus: UNDEFINED
+    sockets: UNDEFINED
+    cores_per_socket: UNDEFINED
+    threads_per_core: UNDEFINED

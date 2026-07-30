@@ -1,0 +1,41 @@
+---
+
+- name: Create nfs dir
+  ansible.builtin.file:
+    path: /srv/nfs4
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+
+- name: Open ports for nfs-server
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ slurm_nfs_ports }}"
+    jump: ACCEPT
+    action: insert
+  loop:
+    - "2049" # nfs-server
+    - "111" # RCP
+    - "20048" # mountd
+  loop_control:
+    loop_var: slurm_nfs_ports
+
+- name: Start and enable nfs-server
+  ansible.builtin.systemd_service:
+    name: nfs-server
+    state: started
+    enabled: true
+
+- name: Update /etc/exports
+  ansible.builtin.template:
+    src: exports
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Export NFS share
+  ansible.builtin.command: exportfs -ra
+  changed_when: false
