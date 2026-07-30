@@ -5,5 +5,5 @@
 
 {{ slurm_controller_ip }}    {{ slurm_controller_hostname }}
 {% for node in slurm_worker_nodes %}
-{{ node.ip }}    {{ node.hostname }}    node{{ loop.index }}
+{{ node.ip }}    {{ node.hostname }}    node-{{ loop.index }}
 {% endfor %}
