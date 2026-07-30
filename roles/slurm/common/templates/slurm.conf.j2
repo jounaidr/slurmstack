@@ -143,6 +143,6 @@ SlurmdLogFile=/var/log/slurm/slurmd.log
 #
 # COMPUTE NODES
 {% for node in slurm_worker_nodes %}
-NodeName=node{{ loop.index }} NodeAddr={{ node.ip }} CPUs={{ node.cpus }} Sockets={{ node.sockets }} CoresPerSocket={{ node.cores_per_socket }} ThreadsPerCore={{ node.threads_per_core }} State=UNKNOWN
+NodeName=node-{{ loop.index }} NodeAddr={{ node.ip }} CPUs={{ node.cpus }} Sockets={{ node.sockets }} CoresPerSocket={{ node.cores_per_socket }} ThreadsPerCore={{ node.threads_per_core }} State=UNKNOWN
 {% endfor %}
-PartitionName=debug Nodes=node[1-{{ slurm_worker_nodes | length }}] Default=YES MaxTime=INFINITE State=UP
+PartitionName=debug Nodes=node-[1-{{ slurm_worker_nodes | length }}] Default=YES MaxTime=INFINITE State=UP
