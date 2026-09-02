@@ -1,0 +1,11 @@
+*.retry
+.vscode
+hosts
+inventory
+ansible.log
+vars.json
+inventory.txt
+venv/
+.ansible/
+tmp*
+*swp
