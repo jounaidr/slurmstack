@@ -1,10 +1,9 @@
 ---
+
 - name: Deploy Slurm Controller
   hosts: slurm_controller
   become: true
   roles:
-    - common/base
-    - common/logging
     - slurm/common
     - slurm/controller
 
@@ -12,7 +11,5 @@
   hosts: slurm_worker
   become: true
   roles:
-    - common/base
-    - common/logging
     - slurm/common
     - slurm/worker
