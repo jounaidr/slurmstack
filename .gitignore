@@ -9,3 +9,5 @@ venv/
 .ansible/
 tmp*
 *swp
+.env
+clouds.yaml

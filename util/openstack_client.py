@@ -4,13 +4,7 @@ Helper functions for interacting with OpenStack
 
 import logging
 import socket
-import subprocess
-from ipaddress import IPv4Network
-from typing import Dict
-
-from config import PoolManagerConfig
-from openstack import connection
-from openstack.exceptions import ResourceNotFound
+import openstack
 
 logger = logging.getLogger(__name__)
 
@@ -19,40 +13,10 @@ class OStack:
     """
     Helper functions for interacting with OpenStack
     """
-
-    def __init__(self, cloud_details: list, config: PoolManagerConfig):
-        self.cloud_connections = self._set_cloud_connections(cloud_details)
-        self.spec_cloud_details: Dict = {}
-        self.conn = None
-        self.config = config
-
-    def _set_cloud_connections(self, cloud_details: list) -> dict:
-        """Initialise all the cloud connections"""
-        connections = {}
-        for cloud in cloud_details:
-            connections[cloud["_id"]] = cloud
-        return connections
-
-    def connect(self, cloud_id: str):
-        """Authenticate with OpenStack and open a connection"""
-        self.spec_cloud_details = self.cloud_connections[cloud_id]
-        region_name = self.spec_cloud_details.get("region_name", None)
-
-        self.conn = connection.Connection(
-            region_name=region_name,
-            auth={
-                "auth_url": self.spec_cloud_details["url"],
-                "username": self.spec_cloud_details["username"],
-                "password": self.spec_cloud_details["password"],
-                "project_name": self.spec_cloud_details["parameters"]["project_name"],
-                "project_domain_name": self.spec_cloud_details["parameters"][
-                    "project_domain_name"
-                ],
-                "user_domain_name": self.spec_cloud_details["parameters"][
-                    "user_domain_name"
-                ],
-            },
-        )
+    
+    def __init__(self):
+        """Initialize OpenStack connection."""
+        self.conn = openstack.connect()
 
     def disconnect(self):
         """Close connection with OpenStack"""
@@ -129,77 +93,3 @@ class OStack:
         except Exception:  # pylint: disable=broad-except
             logger.exception("Error obtaining hostname of VM: %s", vmid)
         return hostname
-
-    def add_to_dns(self, vmid: str, network_name: str):
-        """
-        This is only to be used when the pool manager is deployed on an external cloud
-        """
-        logger.info("Adding DNS record for VM: %s", vmid)
-        ip_address, hostname, reverse_dns_zone = self._get_details_for_dns_record(
-            vmid, network_name
-        )
-
-        cmd = [
-            "sh",
-            "./modify-dns-records.sh",
-            "add",
-            ip_address,
-            hostname,
-            self.config.dns_config.dns_server_ip,
-            self.config.dns_config.domain,
-            f"{reverse_dns_zone}.in-addr.arpa",
-        ]
-        try:
-            subprocess.run(cmd, check=True)
-        except subprocess.CalledProcessError:
-            logger.exception("Error adding VM %s DNS record", vmid)
-
-    def remove_from_dns(self, vmid: str, network_name: str):
-        """
-        This is only to be used when the pool manager is deployed on an external cloud
-        """
-        logger.info("Removing DNS record for VM: %s", vmid)
-        ip_address, hostname, reverse_dns_zone = self._get_details_for_dns_record(
-            vmid, network_name
-        )
-
-        cmd = [
-            "sh",
-            "./modify-dns-records.sh",
-            "remove",
-            ip_address,
-            hostname,
-            self.config.dns_config.dns_server_ip,
-            self.config.dns_config.domain,
-            f"{reverse_dns_zone}.in-addr.arpa",
-        ]
-        try:
-            subprocess.run(cmd, check=True)
-        except subprocess.CalledProcessError:
-            logger.exception("Error removing VM %s DNS record", vmid)
-
-    def _get_details_for_dns_record(self, vmid: str, network_name: str):
-        try:
-            virtual_machine = self.conn.compute.get_server(vmid)  # type: ignore
-            ip_address = virtual_machine.addresses[network_name][0]["addr"]
-
-            network = self.conn.network.find_network(network_name)  # type: ignore
-            subnet = self.conn.get_subnet(network.subnet_ids[0])  # type: ignore
-            network_address = IPv4Network(subnet.cidr).network_address
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.exception(
-                "Error obtaining VM: %s or network: %s information", vmid, network_name
-            )
-            raise exc
-
-        vm_ip_parts = ip_address.split(".")
-        hostname = (
-            f"host-{vm_ip_parts[0]}-{vm_ip_parts[1]}-{vm_ip_parts[2]}-{vm_ip_parts[3]}"
-        )
-
-        network_address_parts = list(
-            filter(lambda ip_part: ip_part != "0", str(network_address).split("."))
-        )
-        reverse_dns_zone = ".".join(network_address_parts[::-1])
-
-        return ip_address, hostname, reverse_dns_zone

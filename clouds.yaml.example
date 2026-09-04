@@ -1,0 +1,19 @@
+# clouds.yaml.example
+# Copy this file to 'clouds.yaml' and fill in your actual credentials,
+# or download from the OpenStack horizon client.
+# DO NOT commit your updated 'clouds.yaml' file.
+
+clouds:
+  default:
+    region_name: "example-region"
+    auth:
+      auth_url: "https://auth.example.com:5000/"
+      username: "YOUR_USERNAME"
+      password: "YOUR_PASSWORD"
+      project_id: "YOUR_PROJECT_ID"
+      project_name: "YOUR_PROJECT_NAME"
+      user_domain_id: "Default"
+      # Alternatively use domain name:
+      # user_domain_name: "Default"
+    interface: "example-interface"
+    identity_api_version: 3
