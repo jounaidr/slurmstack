@@ -10,4 +10,6 @@ venv/
 tmp*
 *swp
 .env
+.env.openstack
 clouds.yaml
+secure.yaml
