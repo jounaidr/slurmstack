@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slurmstack"
+version = "0.1.0"
+description = "Automates OpenStack infrastructure deployment for Slurm clusters"
+requires-python = ">=3.11"
+dependencies = [
+    "python-dotenv==1.0.1",
+    "requests==2.31.0",
+    "openstacksdk==4.6.0",
+    "python-openstackclient==8.2.0",
+]
+
+[project.scripts]
+slurmstack = "slurmstack:main"
