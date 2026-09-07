@@ -5,6 +5,7 @@ Helper functions for interacting with OpenStack
 import logging
 import socket
 import openstack
+from openstack.exceptions import ResourceNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ class OStack:
     """
     Helper functions for interacting with OpenStack
     """
-    
+
     def __init__(self):
         """Initialize OpenStack connection."""
         self.conn = openstack.connect()
@@ -55,6 +56,25 @@ class OStack:
             logger.exception("Error trying to create VM: %s %s", name, parameters)
         return virtual_machine
 
+    def wait_for_active(self, server, timeout=300):
+        """Wait until the OpenStack server reaches ACTIVE status."""
+        try:
+            return self.conn.compute.wait_for_server(server, timeout=timeout)
+        except Exception:
+            logger.exception("Timeout or error waiting for server %s", getattr(server, 'name', 'unknown'))
+            return None
+
+    def get_server_ip(self, server, network_name):
+        """Extract the IPv4 address from an OpenStack server object."""
+        try:
+            addresses = server.addresses.get(network_name, [])
+            for addr in addresses:
+                if addr.get("version") == 4 or ":" not in addr.get("addr", ""):
+                    return addr["addr"]
+        except Exception:
+            logger.exception("Failed to extract IP for server %s", getattr(server, 'name', 'unknown'))
+        return None
+
     def shutdown(self, vmid):
         """Ask OpenStack to shutdown a Virtual Machine"""
         try:
@@ -65,7 +85,10 @@ class OStack:
     def delete(self, vmid):
         """Ask OpenStack to delete a Virtual Machine"""
         try:
-            self.conn.compute.delete_server(vmid)
+            server = self.conn.compute.find_server(vmid)
+            if server:
+                self.conn.compute.delete_server(server.id)
+                logger.info("Deleted OpenStack server: %s", vmid)
         except Exception:  # pylint: disable=broad-except
             logger.exception("Error trying to delete VM: %s", vmid)
 
