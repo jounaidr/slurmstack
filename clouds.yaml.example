@@ -12,8 +12,8 @@ clouds:
       password: "YOUR_PASSWORD"
       project_id: "YOUR_PROJECT_ID"
       project_name: "YOUR_PROJECT_NAME"
-      user_domain_id: "Default"
+      user_domain_id: "example-domain-id"
       # Alternatively use domain name:
-      # user_domain_name: "Default"
+      # user_domain_name: "example-domain-name"
     interface: "example-interface"
     identity_api_version: 3
