@@ -6,6 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "slurmstack"
 version = "0.1.0"
 description = "Automates OpenStack infrastructure deployment for Slurm clusters"
+readme = "README.md"
+keywords = ["openstack", "slurm", "cli", "infrastructure", "hpc"]
 requires-python = ">=3.11"
 dependencies = [
     "python-dotenv==1.0.1",
