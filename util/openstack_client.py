@@ -90,7 +90,7 @@ class OStack:
             server = self.conn.compute.find_server(vmid)
             if server:
                 self.conn.compute.delete_server(server.id)
-                logger.info("Deleted OpenStack server: %s", vmid)
+                logger.info("Deleted OpenStack VM: %s", vmid)
         except Exception:  # pylint: disable=broad-except
             logger.exception("Error trying to delete VM: %s", vmid)
 
