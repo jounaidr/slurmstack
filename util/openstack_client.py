@@ -17,11 +17,13 @@ class OStack:
 
     def __init__(self):
         """Initialize OpenStack connection."""
+        self.conn = None
         self.conn = openstack.connect()
 
     def disconnect(self):
         """Close connection with OpenStack"""
-        self.conn.close()
+        if self.conn:
+            self.conn.close()
 
     def create(self, name, parameters):
         """
