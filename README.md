@@ -10,4 +10,4 @@
 
 ### Prerequisites
 
-### Run SlurmStack
+### Run
