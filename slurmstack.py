@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-SlurmStack Provisioner & Orchestrator
-Automates parallel OpenStack VM provisioning and Slurm cluster deployment via Ansible.
+Parallel OpenStack VM provisioning and Slurm cluster deployment via Ansible.
 """
 
 import argparse
@@ -11,7 +10,6 @@ import os
 import subprocess
 import sys
 import secrets
-
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
@@ -122,6 +120,29 @@ def validate_provision_args(
         )
 
 
+def provision_cluster(args: argparse.Namespace) -> None:
+    """Create all VMs in parallel and run Ansible."""
+    names = cluster_node_names(args)
+    flavours = [args.controller_flavour] + [args.nodes_flavour] * args.nodes_count
+
+    logger.info("Provisioning %d nodes in parallel...", len(names))
+    try:
+        with ThreadPoolExecutor(max_workers=len(names)) as executor:
+            results = list(
+                executor.map(
+                    lambda name, flavour: provision_node(name, flavour, args),
+                    names,
+                    flavours,
+                )
+            )
+    except Exception as exc:
+        logger.error("Provisioning failed: %s", exc)
+        sys.exit(1)
+
+    controller, *workers = results
+    run_ansible(controller, workers, args)
+
+
 def cluster_node_names(args: argparse.Namespace) -> list[str]:
     """Return node names as list."""
     return [args.controller_name] + [
@@ -159,27 +180,46 @@ def provision_node(name: str, flavour: str, args: argparse.Namespace) -> dict:
         ostack.disconnect()
 
 
-def provision_cluster(args: argparse.Namespace) -> None:
-    """Create all VMs in parallel and run Ansible."""
-    names = cluster_node_names(args)
-    flavours = [args.controller_flavour] + [args.nodes_flavour] * args.nodes_count
-
-    logger.info("Provisioning %d nodes in parallel...", len(names))
-    try:
-        with ThreadPoolExecutor(max_workers=len(names)) as executor:
-            results = list(
-                executor.map(
-                    lambda name, flavour: provision_node(name, flavour, args),
-                    names,
-                    flavours,
-                )
-            )
-    except Exception as exc:
-        logger.error("Provisioning failed: %s", exc)
+def run_ansible(
+    controller: dict, workers: list[dict], args: argparse.Namespace
+) -> None:
+    """Write the inventory and run the Ansible deployment playbook."""
+    if not os.path.exists(PLAYBOOK):
+        logger.error("Playbook not found: %s", os.path.abspath(PLAYBOOK))
         sys.exit(1)
 
-    controller, *workers = results
-    run_ansible(controller, workers, args)
+    generate_key("roles/slurm/common/files/munge.key", 1024)
+    generate_key("roles/slurm/controller/files/jwt_hs256.key", 32)
+
+    inv_path = write_inventory(controller, workers, args)
+
+    cmd = [
+        "ansible-playbook",
+        "-i",
+        inv_path,
+        "--private-key",
+        args.ansible_key,
+        PLAYBOOK,
+    ]
+    logger.info("Running: %s", " ".join(cmd))
+    result = subprocess.run(cmd)
+
+    if result.returncode != 0:
+        logger.error("Ansible failed, exit code: %d", result.returncode)
+        sys.exit(result.returncode)
+
+    logger.info("Deployment complete!")
+
+
+def generate_key(path: str, size: int) -> None:
+    """Generate a key file."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    with open(path, "wb") as f:
+        f.write(secrets.token_bytes(size))
+    # Set perms to 400 locally, this will be set on nodes by ansible
+    os.chmod(path, 0o400)
+    logger.info("Key generated at %s", path)
 
 
 def write_inventory(
@@ -216,48 +256,6 @@ def write_inventory(
 
     logger.info("Inventory written to %s", path)
     return path
-
-
-def generate_key(path: str, size: int) -> None:
-    """Generate a key file."""
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-
-    with open(path, "wb") as f:
-        f.write(secrets.token_bytes(size))
-    # Set perms to 400 locally, this will be set on nodes by ansible
-    os.chmod(path, 0o400)
-    logger.info("Key generated at %s", path)
-
-
-def run_ansible(
-    controller: dict, workers: list[dict], args: argparse.Namespace
-) -> None:
-    """Write the inventory and run the Ansible deployment playbook."""
-    if not os.path.exists(PLAYBOOK):
-        logger.error("Playbook not found: %s", os.path.abspath(PLAYBOOK))
-        sys.exit(1)
-
-    generate_key("roles/slurm/common/files/munge.key", 1024)
-    generate_key("roles/slurm/controller/files/jwt_hs256.key", 32)
-
-    inv_path = write_inventory(controller, workers, args)
-
-    cmd = [
-        "ansible-playbook",
-        "-i",
-        inv_path,
-        "--private-key",
-        args.ansible_key,
-        PLAYBOOK,
-    ]
-    logger.info("Running: %s", " ".join(cmd))
-    result = subprocess.run(cmd)
-
-    if result.returncode != 0:
-        logger.error("Ansible failed, exit code: %d", result.returncode)
-        sys.exit(result.returncode)
-
-    logger.info("Deployment complete!")
 
 
 def destroy_cluster(args: argparse.Namespace) -> None:
