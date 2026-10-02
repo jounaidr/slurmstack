@@ -58,7 +58,7 @@ class OStack:
             logger.exception("Error trying to create VM: %s %s", name, parameters)
         return virtual_machine
 
-    def wait_for_active(self, server, timeout=300):
+    def wait_for_active(self, server, wait=300):
         """Wait until the OpenStack server reaches ACTIVE status."""
         try:
             return self.conn.compute.wait_for_server(server, timeout=timeout)
