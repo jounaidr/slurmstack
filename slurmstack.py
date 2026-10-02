@@ -10,6 +10,8 @@ import logging
 import os
 import subprocess
 import sys
+import secrets
+
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
@@ -216,6 +218,17 @@ def write_inventory(
     return path
 
 
+def generate_key(path: str, size: int) -> None:
+    """Generate a key file."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    with open(path, "wb") as f:
+        f.write(secrets.token_bytes(size))
+    # Set perms to 400 locally, this will be set on nodes by ansible
+    os.chmod(path, 0o400)
+    logger.info("Key generated at %s", path)
+
+
 def run_ansible(
     controller: dict, workers: list[dict], args: argparse.Namespace
 ) -> None:
@@ -223,6 +236,9 @@ def run_ansible(
     if not os.path.exists(PLAYBOOK):
         logger.error("Playbook not found: %s", os.path.abspath(PLAYBOOK))
         sys.exit(1)
+
+    generate_key("roles/slurm/common/files/munge.key", 1024)
+    generate_key("roles/slurm/controller/files/jwt_hs256.key", 32)
 
     inv_path = write_inventory(controller, workers, args)
 
