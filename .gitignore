@@ -5,11 +5,11 @@ inventory
 ansible.log
 vars.json
 inventory.txt
+__pycache__/
 venv/
 .ansible/
 tmp*
 *swp
 .env
-.env.openstack
 clouds.yaml
 secure.yaml
