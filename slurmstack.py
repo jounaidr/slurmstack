@@ -257,7 +257,6 @@ def run_ansible(
         logger.error("Ansible failed, exit code: %d", result.returncode)
         sys.exit(result.returncode)
 
-    # os.remove(inv_path) possibly we make removal of inv file optional
     logger.info("Deployment complete!")
 
 
