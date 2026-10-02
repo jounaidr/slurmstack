@@ -61,7 +61,7 @@ class OStack:
     def wait_for_active(self, server, wait=300):
         """Wait until the OpenStack server reaches ACTIVE status."""
         try:
-            return self.conn.compute.wait_for_server(server, timeout=timeout)
+            return self.conn.compute.wait_for_server(server, wait=300)
         except Exception:
             logger.exception("Timeout or error waiting for server %s", getattr(server, 'name', 'unknown'))
             return None
