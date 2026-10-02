@@ -25,7 +25,7 @@ class OStack:
 
     def create(self, name: str, parameters: dict) -> object | None:
         """
-        Ask OpenStack to create a Virtual Machine with supplied parameters
+        Ask OpenStack to create a VM with supplied parameters
         parameters must contain:
         openstack_image
         openstack_flavor
@@ -57,7 +57,7 @@ class OStack:
         return virtual_machine
 
     def wait_for_active(self, server, wait: int = 300) -> object | None:
-        """Wait until the OpenStack server reaches ACTIVE status."""
+        """Wait until the VM reaches ACTIVE status."""
         try:
             return self.conn.compute.wait_for_server(server, wait=wait)
         except Exception:
@@ -65,7 +65,7 @@ class OStack:
             return None
 
     def get_server_ip(self, server, network_name: str) -> str | None:
-        """Extract the IPv4 address from an OpenStack server object."""
+        """Get IP address from VM"""
         try:
             addresses = server.addresses.get(network_name, [])
             for addr in addresses:
@@ -76,7 +76,7 @@ class OStack:
         return None
 
     def delete(self, vmid: str) -> None:
-        """Ask OpenStack to delete a Virtual Machine"""
+        """Request deletion of VM"""
         try:
             server = self.conn.compute.find_server(vmid)
             if not server:
