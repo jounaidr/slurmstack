@@ -5,3 +5,9 @@
 > This project is designed for testing and development. Whilst it can be modified for production use, it should not be considered production-ready out of the box.
 >
 > Consider using [Slinky](https://github.com/SlinkyProject) for a more complete production ready solution.
+
+### Installation
+
+### Prerequisites
+
+### Run SlurmStack
