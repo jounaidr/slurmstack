@@ -13,3 +13,5 @@ tmp*
 .env
 clouds.yaml
 secure.yaml
+roles/slurm/controller/files/jwt_hs256.key
+roles/slurm/common/files/munge.key
