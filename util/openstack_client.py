@@ -3,9 +3,7 @@ Helper functions for interacting with OpenStack
 """
 
 import logging
-import socket
 import openstack
-from openstack.exceptions import ResourceNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +59,7 @@ class OStack:
     def wait_for_active(self, server, wait=300):
         """Wait until the OpenStack server reaches ACTIVE status."""
         try:
-            return self.conn.compute.wait_for_server(server, wait=300)
+            return self.conn.compute.wait_for_server(server, wait=wait)
         except Exception:
             logger.exception("Timeout or error waiting for server %s", getattr(server, 'name', 'unknown'))
             return None
@@ -77,13 +75,6 @@ class OStack:
             logger.exception("Failed to extract IP for server %s", getattr(server, 'name', 'unknown'))
         return None
 
-    def shutdown(self, vmid):
-        """Ask OpenStack to shutdown a Virtual Machine"""
-        try:
-            self.conn.compute.stop_server(vmid)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception("Error trying to shutdown VM: %s", vmid)
-
     def delete(self, vmid):
         """Ask OpenStack to delete a Virtual Machine"""
         try:
@@ -95,28 +86,3 @@ class OStack:
             logger.info("Deleted OpenStack VM: %s", vmid)
         except Exception:  # pylint: disable=broad-except
             logger.exception("Error trying to delete VM: %s", vmid)
-
-    def get_status(self, vmid: str) -> str | None:
-        """Get Virtual Machine status from OpenStack"""
-        # https://docs.openstack.org/api-guide/compute/server_concepts.html
-        status = None
-        try:
-            status = self.conn.compute.get_server(vmid).status  # type: ignore
-        except ResourceNotFound:
-            status = "DELETED"
-        except Exception:  # pylint: disable=broad-except
-            logger.exception("Error when checking status of vm with ID: %s", vmid)
-        return status
-
-    def get_hostname(self, vmid: str, parameters: dict) -> None | str:
-        """Get Virtual Machine hostname"""
-        hostname = None
-        try:
-            virtual_machine = self.conn.compute.get_server(vmid)  # type: ignore
-            ip_address = virtual_machine.addresses[parameters["openstack_network"]][0][
-                "addr"
-            ]
-            hostname = socket.gethostbyaddr(ip_address)[0]
-        except Exception:  # pylint: disable=broad-except
-            logger.exception("Error obtaining hostname of VM: %s", vmid)
-        return hostname
