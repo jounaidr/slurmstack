@@ -13,17 +13,17 @@ class OStack:
     Helper functions for interacting with OpenStack
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize OpenStack connection."""
         self.conn = None
         self.conn = openstack.connect()
 
-    def disconnect(self):
+    def __init__(self) -> None:
         """Close connection with OpenStack"""
         if self.conn:
             self.conn.close()
 
-    def create(self, name, parameters):
+    def create(self, name: str, parameters: dict) -> object | None:
         """
         Ask OpenStack to create a Virtual Machine with supplied parameters
         parameters must contain:
@@ -56,7 +56,7 @@ class OStack:
             logger.exception("Error trying to create VM: %s %s", name, parameters)
         return virtual_machine
 
-    def wait_for_active(self, server, wait=300):
+    def wait_for_active(self, server, wait: int = 300) -> object | None:
         """Wait until the OpenStack server reaches ACTIVE status."""
         try:
             return self.conn.compute.wait_for_server(server, wait=wait)
@@ -64,7 +64,7 @@ class OStack:
             logger.exception("Timeout or error waiting for server %s", getattr(server, 'name', 'unknown'))
             return None
 
-    def get_server_ip(self, server, network_name):
+    def get_server_ip(self, server, network_name: str) -> str | None:
         """Extract the IPv4 address from an OpenStack server object."""
         try:
             addresses = server.addresses.get(network_name, [])
@@ -75,7 +75,7 @@ class OStack:
             logger.exception("Failed to extract IP for server %s", getattr(server, 'name', 'unknown'))
         return None
 
-    def delete(self, vmid):
+    def delete(self, vmid: str) -> None:
         """Ask OpenStack to delete a Virtual Machine"""
         try:
             server = self.conn.compute.find_server(vmid)
