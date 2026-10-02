@@ -18,7 +18,7 @@ class OStack:
         self.conn = None
         self.conn = openstack.connect()
 
-    def __init__(self) -> None:
+    def disconnect(self) -> None:
         """Close connection with OpenStack"""
         if self.conn:
             self.conn.close()
