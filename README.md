@@ -52,3 +52,5 @@ A Rocky Linux 9 image must be available in your OpenStack project. The image nam
 A network must exist for the OpenStack project, which be accessible to the VMs. The network name can be set via `SS_NETWORK`.
 
 ### Run
+
+# if ansible fails run: ansible-playbook -i inventory_<cluster-name>.json --private-key /path/to/key playbooks/deploy_nodes.yml
