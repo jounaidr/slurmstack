@@ -28,7 +28,7 @@ ansible-galaxy collection install -r requirements.yml
 
 ### Prerequisites
 
-The following must be in place in your **OpenStack** project before running _SlurmStack_.
+The following must be in place within your **OpenStack** project before running _SlurmStack_.
 
 <ins>OpenStack credentials</ins>
 
@@ -45,6 +45,7 @@ To obtain a `clouds.yaml` file from your **OpenStack** Horizon dashboard, do the
 7. Click Download clouds.yaml.
 
 You can also create a `clouds.yaml` file manually using the provided example:
+
 ```bash
 cp clouds.yaml.example clouds.yaml
 ```
