@@ -6,6 +6,8 @@
 >
 > Consider using [Slinky](https://github.com/SlinkyProject) for a more complete production ready solution.
 
+---
+
 ### Installation
 
 **Requirements**
@@ -20,6 +22,8 @@ cd slurmstack
 pip install -e .
 ansible-galaxy collection install -r requirements.yml
 ```
+
+---
 
 ### Prerequisites
 
@@ -51,6 +55,8 @@ A Rocky Linux 9 image must be available in your OpenStack project. The image nam
 **Network**
 
 A network must exist for the OpenStack project, which be accessible to the VMs. The network name can be set via `SS_NETWORK`.
+
+---
 
 ### Run
 
