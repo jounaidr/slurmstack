@@ -26,6 +26,7 @@ ansible-galaxy collection install -r requirements.yml
 The following must be in place in your OpenStack project before running SlurmStack.
 
 **OpenStack credentials**
+
 The OpenStack credentials can be set using a `clouds.yaml` file, or via the respective environment variables within `.env`.
 
 To obtain a `clouds.yaml` file from your OpenStack Horizon dashboard, do the following:
@@ -53,4 +54,4 @@ A network must exist for the OpenStack project, which be accessible to the VMs. 
 
 ### Run
 
-# if ansible fails run: ansible-playbook -i inventory_<cluster-name>.json --private-key /path/to/key playbooks/deploy_nodes.yml
+if ansible fails run: `ansible-playbook -i inventory_<cluster-name>.json --private-key /path/to/key playbooks/deploy_nodes.yml`
