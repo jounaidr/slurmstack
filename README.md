@@ -10,11 +10,12 @@
 
 ### Installation
 
-**Requirements**
+<ins>Requirements</ins>
+
 - Python 3.11+
 - pip
 
-Clone the repository and install the Python/Ansible dependencies:
+Clone the repository and install the **Python/Ansible** dependencies:
 
 ```bash
 git clone <repo-url>
@@ -27,13 +28,13 @@ ansible-galaxy collection install -r requirements.yml
 
 ### Prerequisites
 
-The following must be in place in your OpenStack project before running SlurmStack.
+The following must be in place in your **OpenStack** project before running _SlurmStack_.
 
-**OpenStack credentials**
+<ins>OpenStack credentials</ins>
 
-The OpenStack credentials can be set using a `clouds.yaml` file, or via the respective environment variables within `.env`.
+The **OpenStack** credentials can be set using a `clouds.yaml` file, or via the respective environment variables within `.env`.
 
-To obtain a `clouds.yaml` file from your OpenStack Horizon dashboard, do the following:
+To obtain a `clouds.yaml` file from your **OpenStack** Horizon dashboard, do the following:
 
 1. Log into Horizon
 2. On the left bar, click Identity.
@@ -48,13 +49,13 @@ You can also create a `clouds.yaml` file manually using the provided example:
 cp clouds.yaml.example clouds.yaml
 ```
 
-**Rocky Linux 9 image**
+<ins>Rocky Linux 9 image</ins>
 
-A Rocky Linux 9 image must be available in your OpenStack project. The image name is set via `SS_IMAGE`. Base Rocky Linux 9 images can be found on the (Rocky Linux download webpage)[https://rockylinux.org/download].
+A **Rocky Linux 9** image must be available in your **OpenStack** project. The image name is set via `SS_IMAGE`. Base **Rocky Linux 9** images can be found on the (Rocky Linux download webpage)[https://rockylinux.org/download].
 
-**Network**
+<ins>Network</ins>
 
-A network must exist for the OpenStack project, which be accessible to the VMs. The network name can be set via `SS_NETWORK`.
+A network must exist for the **OpenStack** project, which must be accessible to the VMs. The network name can be set via `SS_NETWORK`.
 
 ---
 
