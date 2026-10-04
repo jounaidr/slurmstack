@@ -51,7 +51,7 @@ cp clouds.yaml.example clouds.yaml
 
 <ins>Rocky Linux 9 image</ins>
 
-A **Rocky Linux 9** image must be available in your **OpenStack** project. The image name is set via `SS_IMAGE`. Base **Rocky Linux 9** images can be found on the (Rocky Linux download webpage)[https://rockylinux.org/download].
+A **Rocky Linux 9** image must be available in your **OpenStack** project. The image name is set via `SS_IMAGE`. Base images can be found on the [Rocky Linux download webpage](https://rockylinux.org/download).
 
 <ins>Network</ins>
 
