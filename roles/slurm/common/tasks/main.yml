@@ -68,7 +68,7 @@
 
 - name: Create slurm directories
   ansible.builtin.file:
-    path: "{{ slurm_dirs }}"
+    path: "{{ item }}"
     owner: slurm
     group: slurm
     mode: "0755"
@@ -79,8 +79,6 @@
     - /var/lib/slurm
     - /run/slurm
     - /var/spool/slurm
-  loop_control:
-    loop_var: slurm_dirs
 
 - name: Update slurm.conf
   ansible.builtin.template:
