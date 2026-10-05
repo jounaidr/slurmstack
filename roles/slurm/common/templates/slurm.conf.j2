@@ -2,6 +2,7 @@
 #
 ClusterName={{ slurm_cluster_name }}
 SlurmctldHost={{ slurm_controller_hostname }}
+SlurmctldAddr={{ slurm_controller_ip }}
 AuthAltTypes=auth/jwt
 AuthAltParameters=jwt_key=/var/spool/slurm/statesave/jwt_hs256.key
 #DisableRootJobs=NO
@@ -144,6 +145,6 @@ SlurmdLogFile=/var/log/slurm/slurmd.log
 #
 # COMPUTE NODES
 {% for node in slurm_worker_nodes %}
-NodeName=node-{{ loop.index }} NodeAddr={{ node.ip }} State=UNKNOWN
+NodeName={{ node.hostname }} NodeAddr={{ node.ip }} State=UNKNOWN
 {% endfor %}
-PartitionName=debug Nodes=node-[1-{{ slurm_worker_nodes | length }}] Default=YES MaxTime=INFINITE State=UP
+PartitionName=debug Nodes={{ slurm_worker_nodes | map(attribute='hostname') | join(',') }} Default=YES MaxTime=INFINITE State=UP
