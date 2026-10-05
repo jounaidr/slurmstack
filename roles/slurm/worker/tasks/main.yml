@@ -21,12 +21,11 @@
     state: mounted
 
 - name: Open slurmd port
-  ansible.builtin.iptables:
-    chain: INPUT
-    protocol: tcp
-    destination_port: "6818"
-    jump: ACCEPT
-    action: insert
+  ansible.posix.firewalld:
+    port: "6818/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
 
 - name: Start and enable slurmd
   ansible.builtin.systemd_service:

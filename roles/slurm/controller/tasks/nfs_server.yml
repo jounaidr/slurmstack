@@ -8,19 +8,22 @@
     mode: "0755"
     state: directory
 
+- name: Ensure firewalld is running
+  ansible.builtin.systemd_service:
+    name: firewalld
+    state: started
+    enabled: true
+
 - name: Open ports for nfs-server
-  ansible.builtin.iptables:
-    chain: INPUT
-    protocol: tcp
-    destination_port: "{{ slurm_nfs_ports }}"
-    jump: ACCEPT
-    action: insert
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
   loop:
-    - "2049" # nfs-server
-    - "111" # RCP
-    - "20048" # mountd
-  loop_control:
-    loop_var: slurm_nfs_ports
+    - nfs
+    - rpc-bind
+    - mountd
 
 - name: Start and enable nfs-server
   ansible.builtin.systemd_service:

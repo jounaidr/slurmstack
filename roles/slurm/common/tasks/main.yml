@@ -111,3 +111,9 @@
     name: munge
     enabled: true
     state: started
+
+- name: Ensure firewalld is running
+  ansible.builtin.systemd_service:
+    name: firewalld
+    state: started
+    enabled: true
