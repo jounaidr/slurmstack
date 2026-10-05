@@ -1,4 +1,7 @@
 ---
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ slurm_worker_nodes[groups['slurm_worker'].index(inventory_hostname)].hostname }}"
 
 - name: Install slurm worker package
   ansible.builtin.dnf:
