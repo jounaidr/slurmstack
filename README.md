@@ -28,7 +28,7 @@ ansible-galaxy collection install -r requirements.yml
 
 ### Prerequisites
 
-The following must be in place in your **OpenStack** project before running _SlurmStack_.
+The following must be in place within your **OpenStack** project before running _SlurmStack_.
 
 <ins>OpenStack credentials</ins>
 
@@ -45,13 +45,14 @@ To obtain a `clouds.yaml` file from your **OpenStack** Horizon dashboard, do the
 7. Click Download clouds.yaml.
 
 You can also create a `clouds.yaml` file manually using the provided example:
+
 ```bash
 cp clouds.yaml.example clouds.yaml
 ```
 
 <ins>Rocky Linux 9 image</ins>
 
-A **Rocky Linux 9** image must be available in your **OpenStack** project. The image name is set via `SS_IMAGE`. Base **Rocky Linux 9** images can be found on the (Rocky Linux download webpage)[https://rockylinux.org/download].
+A **Rocky Linux 9** image must be available in your **OpenStack** project. The image name is set via `SS_IMAGE`. Base images can be found on the [Rocky Linux download webpage](https://rockylinux.org/download).
 
 <ins>Network</ins>
 
