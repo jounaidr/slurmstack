@@ -18,6 +18,7 @@ from util.openstack_client import OStack
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
 )
+logging.getLogger("keystoneauth").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 
 PLAYBOOK = "playbooks/deploy_nodes.yml"
