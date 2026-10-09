@@ -58,8 +58,21 @@ A **Rocky Linux 9** image must be available in your **OpenStack** project. The i
 
 A network must exist for the **OpenStack** project, which must be accessible to the VMs. The network name can be set via `SS_NETWORK`.
 
+<ins>Security groups</ins>
+
+One or more security groups must be pre-created in **OpenStack** and assigned to the VMs via `SS_SECGROUP`. At a minimum, the groups should allow:
+
+- SSH (port 22) from your control machine
+- All internal traffic between cluster nodes
+
+<ins>SSH key pair</ins>
+
+An SSH key pair must be registered in **OpenStack**, and the corresponding private key must be accessible on the machine running _SlurmStack_. Set the path via SS_ANSIBLE_KEY. Ansible uses this key to connect to the provisioned VMs.
+
 ---
 
 ### Run
+
+
 
 if ansible fails run: `ansible-playbook -i inventory_<cluster-name>.json --private-key /path/to/key playbooks/deploy_nodes.yml`
