@@ -106,5 +106,4 @@ options:
   -k,   --ansible-key         Path to SSH private key for Ansible
 ```
 
-
-if ansible fails run: `ansible-playbook -i inventory_<cluster-name>.json --private-key /path/to/key playbooks/deploy_nodes.yml`
+If the Ansible run fails, you can manually restart the playbook via: `ansible-playbook -i inventory_<cluster-name>.json --private-key /path/to/key playbooks/deploy_nodes.yml`
